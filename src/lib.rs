@@ -58,39 +58,39 @@ pub fn odd_even_jump_iterative(number_array: Vec<i16>) -> u16 {
     count
 }
 // [2, 3, 1, 1, 4]
-pub fn odd_even_jump(a: Vec<i32>) -> () {
-    let last_arr_index = a.len() - 1;
-    let mut good_odd_jumps: Vec<bool> = Vec::with_capacity(a.len());
-    let mut good_even_jumps: Vec<bool> = Vec::with_capacity(a.len());
-    let mut index_map: BTreeMap<i32, usize> = BTreeMap::new();
-    good_odd_jumps[a.len() - 1] = true;
-    good_even_jumps[a.len() - 1] = true;
-    index_map.insert(a[a.len() - 1], a.len() - 1);
-
-    for i in [0..last_arr_index].iter().rev() {
-        if let Some((index_value, _index)) = index_map.get(a[i]) {
-            good_even_jumps.insert(i, good_odd_jumps[index_value]);
-            good_odd_jumps.insert(i, good_even_jumps[index_value]);
-        } else {
-            let next_higher_value = index_map.range((Excluded(a[i]), Unbounded)).next();
-            let last_lower_value = index_map.range(a[i]..).next_back();
-            println!("next_higher_value: {:?}", &next_higher_value);
-            println!("last_lower_value: {:?}", &last_lower_value);
-
-            if let Some((higher_value, _index)) = next_higher_value {
-                good_odd_jumps.insert(i, good_even_jumps[higher_value]);
-            }
-
-            if let Some((lower_value, _index)) = last_lower_value {
-                good_even_jumps.insert(i, good_odd_jumps[lower_value]);
-            }
-
-            index_map.insert(a[i], i);
-        }
-    }
-    println!("odd index: {:?}", &good_odd_jumps);
-    println!("even index: {:?}", &good_even_jumps);
-}
+// pub fn odd_even_jump(a: Vec<i32>) -> () {
+//     let last_arr_index = a.len() - 1;
+//     let mut good_odd_jumps: Vec<bool> = Vec::with_capacity(a.len());
+//     let mut good_even_jumps: Vec<bool> = Vec::with_capacity(a.len());
+//     let mut index_map: BTreeMap<i32, usize> = BTreeMap::new();
+//     good_odd_jumps[a.len() - 1] = true;
+//     good_even_jumps[a.len() - 1] = true;
+//     index_map.insert(a[a.len() - 1], a.len() - 1);
+// 
+//     for i in [0..last_arr_index].iter().rev() {
+//         if let Some((index_value, _index)) = index_map.get(a[i]) {
+//             good_even_jumps.insert(i, good_odd_jumps[index_value]);
+//             good_odd_jumps.insert(i, good_even_jumps[index_value]);
+//         } else {
+//             let next_higher_value = index_map.range((Excluded(a[i]), Unbounded)).next();
+//             let last_lower_value = index_map.range(a[i]..).next_back();
+//             println!("next_higher_value: {:?}", &next_higher_value);
+//             println!("last_lower_value: {:?}", &last_lower_value);
+// 
+//             if let Some((higher_value, _index)) = next_higher_value {
+//                 good_odd_jumps.insert(i, good_even_jumps[higher_value]);
+//             }
+// 
+//             if let Some((lower_value, _index)) = last_lower_value {
+//                 good_even_jumps.insert(i, good_odd_jumps[lower_value]);
+//             }
+// 
+//             index_map.insert(a[i], i);
+//         }
+//     }
+//     println!("odd index: {:?}", &good_odd_jumps);
+//     println!("even index: {:?}", &good_even_jumps);
+// }
 
 // pub fn monotonic_odd_even_jump(a: Vec<i32>) {
 //     let mut sorted_a = a.clone();
@@ -121,9 +121,39 @@ pub fn odd_even_jump(a: Vec<i32>) -> () {
 //     ()
 // }
 
+fn format_license_key(s: String, k: i32) -> String {
+    let mut new_key: Vec<String> = Vec::with_capacity(s.len());
+    let mut group_index = 0;
+    for (i, char) in s.char_indices().rev() {
+        if group_index == k {
+            if char.to_string() == "-" {
+                new_key.push(char.to_string());
+                group_index = 0;
+            } else {
+                new_key.push(String::from("-"));
+                new_key.push(char.to_uppercase().to_string());
+                group_index = 1;
+            }
+        } else {
+            if char.to_string() == "-" {
+                continue;
+            } else {
+                new_key.push(char.to_uppercase().to_string());
+                group_index += 1;
+            }
+        }
+    }
+    if let Some(char) = new_key.last() {
+        if char == "-" {
+            new_key.pop();
+        }
+    }
+    new_key.join("").chars().rev().collect()
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{unique_email_addresses, odd_even_jump_iterative, odd_even_jump};
+    use super::{unique_email_addresses, odd_even_jump_iterative, format_license_key};
     #[test]
     fn test_unique_email_addresses() {
         let emails = vec![
@@ -154,9 +184,23 @@ mod tests {
         assert_eq!(odd_even_jump_iterative(num_array), 3);
     }
 
+    // #[test]
+    // fn test_improved_odd_even_jump() {
+    //     let num_array = vec![2, 3, 1, 1, 4];
+    //     odd_even_jump(num_array);
+    // }
+
     #[test]
-    fn test_improved_odd_even_jump() {
-        let num_array = vec![2, 3, 1, 1, 4];
-        odd_even_jump(num_array);
+    fn test_format_license_key() {
+        let key = "1-5Wyz-9e-t5";
+        let grouping_size = 4;
+        assert_eq!(format_license_key(String::from(key), grouping_size), "1-5WYZ-9ET5");
+    }
+
+    #[test]
+    fn test_format_license_key_2() {
+        let key = "--a-a-a-a--";
+        let grouping_size = 2;
+        assert_eq!(format_license_key(String::from(key), grouping_size), "AA-AA");
     }
 }
