@@ -124,7 +124,7 @@ pub fn odd_even_jump_iterative(number_array: Vec<i16>) -> u16 {
 fn format_license_key(s: String, k: i32) -> String {
     let mut new_key: Vec<String> = Vec::with_capacity(s.len());
     let mut group_index = 0;
-    for (i, char) in s.char_indices().rev() {
+    for char in s.chars().rev() {
         if group_index == k {
             if char.to_string() == "-" {
                 new_key.push(char.to_string());
