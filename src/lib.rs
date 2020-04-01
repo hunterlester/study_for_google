@@ -151,9 +151,61 @@ fn format_license_key(s: String, k: i32) -> String {
     new_key.join("").chars().rev().collect()
 }
 
+fn fruit_into_baskets(tree: Vec<i32>) -> i32 {
+    let mut fruit_sums: Vec<i32> = Vec::with_capacity(tree.len());
+    let mut index: Option<usize> = Some(0);
+    let mut basket_one_count = 0;
+    let mut basket_two_count = 0;
+    while let Some(i) = index {
+        let mut fruit_one: Option<i32> = None;
+        let mut fruit_two: Option<i32> = None;
+        let mut fruit_two_index: Option<usize> = None;
+        for (fruit_index, fruit) in tree[i..].iter().enumerate() {
+            if let Some(int) = fruit_one {
+                if *fruit == int {
+                    basket_one_count += 1;
+                }
+            } else {
+                fruit_one = Some(*fruit);
+                basket_one_count += 1;
+            }
+
+            if let Some(int) = fruit_two {
+                if *fruit == int {
+                    basket_two_count += 1;
+                } else if Some(*fruit) != fruit_one {
+                    fruit_sums.push(basket_one_count + basket_two_count);
+                    basket_one_count = 0;
+                    basket_two_count = 0;
+                    if let Some(starting_fruit_two_index) = fruit_two_index {
+                        index = Some(starting_fruit_two_index);
+                    }
+                    break;
+                }
+            } else {
+                if Some(*fruit) != fruit_one {
+                    fruit_two_index = Some(i + fruit_index);
+                    fruit_two = Some(*fruit);
+                    basket_two_count += 1;
+                }
+            }
+
+            if i + fruit_index == tree.len() - 1 {
+                fruit_sums.push(basket_one_count + basket_two_count);
+                basket_one_count = 0;
+                basket_two_count = 0;
+                index = None;
+                break;
+            }
+        }
+    }
+    fruit_sums.sort();
+    fruit_sums[fruit_sums.len() - 1]
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{unique_email_addresses, odd_even_jump_iterative, format_license_key};
+    use super::{unique_email_addresses, odd_even_jump_iterative, format_license_key, fruit_into_baskets};
     #[test]
     fn test_unique_email_addresses() {
         let emails = vec![
@@ -202,5 +254,35 @@ mod tests {
         let key = "--a-a-a-a--";
         let grouping_size = 2;
         assert_eq!(format_license_key(String::from(key), grouping_size), "AA-AA");
+    }
+
+    #[test]
+    fn test_fruit_into_baskets() {
+        let tree = vec![3, 3, 3, 1, 2, 1, 1, 2, 3, 3, 4];
+        assert_eq!(fruit_into_baskets(tree), 5)
+    }
+
+    #[test]
+    fn test_fruit_into_baskets_2() {
+        let tree = vec![3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4];
+        assert_eq!(fruit_into_baskets(tree), 11)
+    }
+
+    #[test]
+    fn test_fruit_into_baskets_3() {
+        let tree = vec![3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3];
+        assert_eq!(fruit_into_baskets(tree), 11)
+    }
+
+    #[test]
+    fn test_fruit_into_baskets_4() {
+        let tree = vec![3];
+        assert_eq!(fruit_into_baskets(tree), 1)
+    }
+
+    #[test]
+    fn test_fruit_into_baskets_5() {
+        let tree = vec![0, 1, 6, 6, 4, 4, 6];
+        assert_eq!(fruit_into_baskets(tree), 5)
     }
 }
