@@ -151,56 +151,96 @@ fn format_license_key(s: String, k: i32) -> String {
     new_key.join("").chars().rev().collect()
 }
 
+// fn fruit_into_baskets(tree: Vec<i32>) -> i32 {
+//     let mut fruit_sums: Vec<i32> = Vec::with_capacity(tree.len());
+//     let mut index: Option<usize> = Some(0);
+//     let mut basket_one_count = 0;
+//     let mut basket_two_count = 0;
+//     while let Some(i) = index {
+//         let mut fruit_one: Option<i32> = None;
+//         let mut fruit_two: Option<i32> = None;
+//         let mut fruit_two_index: Option<usize> = None;
+//         for (fruit_index, fruit) in tree[i..].iter().enumerate() {
+//             if let Some(int) = fruit_one {
+//                 if *fruit == int {
+//                     basket_one_count += 1;
+//                 }
+//             } else {
+//                 fruit_one = Some(*fruit);
+//                 basket_one_count += 1;
+//             }
+// 
+//             if let Some(int) = fruit_two {
+//                 if *fruit == int {
+//                     basket_two_count += 1;
+//                 } else if Some(*fruit) != fruit_one {
+//                     fruit_sums.push(basket_one_count + basket_two_count);
+//                     basket_one_count = 0;
+//                     basket_two_count = 0;
+//                     if let Some(starting_fruit_two_index) = fruit_two_index {
+//                         index = Some(starting_fruit_two_index);
+//                     }
+//                     break;
+//                 }
+//             } else {
+//                 if Some(*fruit) != fruit_one {
+//                     fruit_two_index = Some(i + fruit_index);
+//                     fruit_two = Some(*fruit);
+//                     basket_two_count += 1;
+//                 }
+//             }
+// 
+//             if i + fruit_index == tree.len() - 1 {
+//                 fruit_sums.push(basket_one_count + basket_two_count);
+//                 basket_one_count = 0;
+//                 basket_two_count = 0;
+//                 index = None;
+//                 break;
+//             }
+//         }
+//     }
+//     fruit_sums.sort();
+//     fruit_sums[fruit_sums.len() - 1]
+// }
+
 fn fruit_into_baskets(tree: Vec<i32>) -> i32 {
-    let mut fruit_sums: Vec<i32> = Vec::with_capacity(tree.len());
+    let mut sub_trees: Vec<i32> = Vec::new();
     let mut index: Option<usize> = Some(0);
-    let mut basket_one_count = 0;
-    let mut basket_two_count = 0;
     while let Some(i) = index {
         let mut fruit_one: Option<i32> = None;
         let mut fruit_two: Option<i32> = None;
-        let mut fruit_two_index: Option<usize> = None;
+        let mut fruit_two_first_index: Option<usize> = None;
         for (fruit_index, fruit) in tree[i..].iter().enumerate() {
-            if let Some(int) = fruit_one {
-                if *fruit == int {
-                    basket_one_count += 1;
-                }
-            } else {
+            if let None = fruit_one {
                 fruit_one = Some(*fruit);
-                basket_one_count += 1;
             }
 
             if let Some(int) = fruit_two {
-                if *fruit == int {
-                    basket_two_count += 1;
-                } else if Some(*fruit) != fruit_one {
-                    fruit_sums.push(basket_one_count + basket_two_count);
-                    basket_one_count = 0;
-                    basket_two_count = 0;
-                    if let Some(starting_fruit_two_index) = fruit_two_index {
-                        index = Some(starting_fruit_two_index);
-                    }
+                if *fruit != int && Some(*fruit) != fruit_one {
+                    sub_trees.push(tree[i..i + fruit_index].len() as i32);
+                    fruit_one = None;
+                    fruit_two = None;
+                    index = fruit_two_first_index;
                     break;
                 }
             } else {
                 if Some(*fruit) != fruit_one {
-                    fruit_two_index = Some(i + fruit_index);
                     fruit_two = Some(*fruit);
-                    basket_two_count += 1;
+                    fruit_two_first_index = Some(i + fruit_index);
                 }
             }
 
             if i + fruit_index == tree.len() - 1 {
-                fruit_sums.push(basket_one_count + basket_two_count);
-                basket_one_count = 0;
-                basket_two_count = 0;
+                sub_trees.push(tree[i..=i + fruit_index].len() as i32);
+                fruit_one = None;
+                fruit_two = None;
                 index = None;
                 break;
             }
         }
     }
-    fruit_sums.sort();
-    fruit_sums[fruit_sums.len() - 1]
+    sub_trees.sort();
+    sub_trees[sub_trees.len() - 1]
 }
 
 #[cfg(test)]
@@ -284,5 +324,11 @@ mod tests {
     fn test_fruit_into_baskets_5() {
         let tree = vec![0, 1, 6, 6, 4, 4, 6];
         assert_eq!(fruit_into_baskets(tree), 5)
+    }
+
+    #[test]
+    fn test_fruit_into_baskets_6() {
+        let tree = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+        assert_eq!(fruit_into_baskets(tree), 2)
     }
 }
