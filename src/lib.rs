@@ -1,3 +1,5 @@
+mod arrays_strings;
+
 use std::collections::{HashSet, BTreeMap};
 use std::ops::Bound::{Unbounded, Excluded};
 
@@ -242,6 +244,8 @@ fn fruit_into_baskets(tree: Vec<i32>) -> i32 {
     sub_trees.sort();
     sub_trees[sub_trees.len() - 1]
 }
+
+// solve binary tree inversion
 
 #[cfg(test)]
 mod tests {
