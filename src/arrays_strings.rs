@@ -1,5 +1,5 @@
-use std::collections::{HashSet, HashMap};
-use std::cmp::max;
+use std::collections::{HashSet, HashMap, BTreeMap};
+use std::cmp::{max, min};
 
 // pub fn longest_substring(s: String) -> i32 {
 //     let mut char_set: HashSet<String> = HashSet::new();
@@ -74,9 +74,52 @@ pub fn longest_substring(s: String) -> i32 {
     longest_substring_len as i32
 }
 
+// O(4n)
+// pub fn max_area(height: Vec<i32>) -> i32 {
+//     let mut max_container = 0;
+//     let mut iterations = 0;
+//     for (index_one, coordinate_one) in height.iter().enumerate() {
+//         if index_one == height.len() - 1 {
+//             break;
+//         }
+//         for (index_two, coordinate_two) in height[index_one + 1..].iter().enumerate() {
+//             iterations += 1;
+//             let second_index = index_one + index_two + 1;
+//             println!("index_one: {:?}, index_two: {:?}", index_one, second_index);
+//             let width = second_index - index_one;
+//             let height = min(coordinate_one, coordinate_two);
+//             max_container = max(max_container, width as i32 * *height);
+//         }
+//     }
+//     println!("iterations: {:?}", iterations);
+//     println!("max_container: {:?}", max_container);
+//     max_container
+// }
+
+// O(n)
+pub fn max_area(height: Vec<i32>) -> i32 {
+    if height.len() == 0 {
+        return 0;
+    }
+    let mut starting_index: usize = 0;
+    let mut closing_index: usize = height.len() - 1;
+    let mut max_area: i32 = 0;
+    while starting_index < closing_index {
+        let width = closing_index - starting_index;
+        let length = min(height[closing_index], height[starting_index]);
+        max_area = max(max_area, length * width as i32);
+        if height[closing_index] > height[starting_index] {
+            starting_index += 1;
+        } else {
+            closing_index -= 1;
+        }
+    }
+    max_area
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{longest_substring};
+    use super::{longest_substring, max_area};
 
     #[test]
     fn test_longest_substring() {
@@ -101,5 +144,18 @@ mod tests {
         s = String::from("abcc");
         assert_eq!(longest_substring(s), 3);
     }
-
+    
+    #[test]
+    fn test_max_area() {
+        let mut height = vec![1,8,6,2,5,4,8,3,7];
+        assert_eq!(max_area(height), 49);
+        height = vec![1,3,2,5,4,8,6,7,8];
+        assert_eq!(max_area(height), 25);
+        height = vec![1,3,2,50,60,8,6,7,8];
+        assert_eq!(max_area(height), 50);
+        height = vec![1];
+        assert_eq!(max_area(height), 0);
+        height = vec![];
+        assert_eq!(max_area(height), 0);
+    }
 }
