@@ -1,4 +1,4 @@
-use std::collections::{HashSet, HashMap, BTreeMap};
+use std::collections::{HashSet, HashMap, BTreeMap, BTreeSet};
 use std::cmp::{max, min};
 
 // pub fn longest_substring(s: String) -> i32 {
@@ -117,9 +117,117 @@ pub fn max_area(height: Vec<i32>) -> i32 {
     max_area
 }
 
+// no good as exceeds time limit when n is large
+// fn three_sum(nums: Vec<i32>) -> Vec<Vec<i32>> {
+//     let mut a: usize = 0;
+//     let mut b: usize = 1;
+//     let mut answer_set: BTreeSet<Vec<i32>> = BTreeSet::new();
+//     let mut output = Vec::new();
+//     println!("nums len: {:?}", nums.len());
+//     while nums.len() >= 3 && a <= nums.len() - 3 {
+//         println!("a: {:?}, b: {:?}", a, b);
+//         for v in &nums[b + 1..] {
+//             if nums[a] + nums[b] + v == 0 {
+//                 let mut triplet = vec![nums[a], nums[b], *v];
+//                 triplet.sort();
+//                 answer_set.insert(triplet);
+//             }
+//             if b == nums.len() - 2 {
+//                 a += 1;
+//                 b = a;
+//             }
+//         }
+//         b += 1;
+//     }
+//     for vec in answer_set.iter() {
+//         output.push(vec.clone());
+//     }
+//     output
+// }
+
+// dead end
+// fn three_sum(mut nums: Vec<i32>) -> Vec<Vec<i32>> {
+//     println!("{:?}", &nums);
+//     let mut output = Vec::new();
+//     if nums.len() < 3 {
+//         return output;
+//     }
+//     let mut a: usize = 0;
+//     let mut b: usize = nums.len() - 1;
+//     let mut answer_set: BTreeSet<Vec<i32>> = BTreeSet::new();
+//     let mut value_map: HashMap<i32, usize> = HashMap::new();
+//     for (i, value) in nums.iter().enumerate() {
+//         value_map.insert(*value, i);
+//     }
+//     nums.sort();
+//     while a < b {
+//         let a_value = nums[a];
+//         let b_value = nums[b];
+//         let c_value = -(a_value + b_value);
+//         println!("a: {:?}, b: {:?}", a, b);
+//         println!("a_value: {:?}, b_value: {:?}, c_value: {:?}", a_value, b_value, c_value);
+//         let is_zero_sum = a_value + b_value + c_value == 0;
+//         if value_map.contains_key(&c_value) && is_zero_sum {
+//             let mut triplet = vec![a_value, b_value, c_value];
+//             triplet.sort();
+//             answer_set.insert(triplet);
+//         }
+//         a += 1;
+//         b -= 1;
+//     }
+//     for vec in answer_set.iter() {
+//         output.push(vec.clone());
+//     }
+//     output
+// }
+
+fn three_sum(nums: Vec<i32>) -> Vec<Vec<i32>> {
+    let mut answer_set: BTreeSet<Vec<i32>> = BTreeSet::new();
+    let mut output = Vec::new();
+    let mut value_map: HashMap<i32, i32> = HashMap::new();
+    let mut a: usize = 0;
+    let mut b: usize = 1;
+    for v in nums.iter() {
+        if let Some(count) = value_map.get_mut(v) {
+            *count += 1;
+        } else {
+            value_map.insert(*v, 1);
+        }
+    }
+
+    while nums.len() >= 3 && a <= nums.len() - 2 {
+        let a_value = nums[a];
+        let b_value = nums[b];
+        let complement = -(a_value + b_value);
+        let mut duplicate_count = 0;
+        if complement == a_value {
+            duplicate_count += 1;
+        }
+        if complement == b_value {
+            duplicate_count += 1;
+        }
+        if let Some(count) = value_map.get(&complement) {
+            if *count > duplicate_count {
+                let mut triplet = vec![a_value, b_value, complement];
+                triplet.sort();
+                answer_set.insert(triplet);
+            }
+        }
+        if b == nums.len() -1 {
+            a += 1;
+            b = a;
+        }
+        b += 1;
+    }
+    for vec in answer_set.iter() {
+        output.push(vec.clone());
+    }
+    output
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{longest_substring, max_area};
+    use super::{longest_substring, max_area, three_sum};
 
     #[test]
     fn test_longest_substring() {
@@ -157,5 +265,33 @@ mod tests {
         assert_eq!(max_area(height), 0);
         height = vec![];
         assert_eq!(max_area(height), 0);
+    }
+
+    #[test]
+    fn test_three_sum() {
+        let mut nums = vec![-1, 0, 1, 2, -1, -4];
+        let mut output = vec![vec![-1, -1, 2], vec![-1, 0, 1]];
+        assert_eq!(three_sum(nums), output);
+        nums = vec![];
+        output = vec![];
+        assert_eq!(three_sum(nums), output);
+        nums = vec![0];
+        output = vec![];
+        assert_eq!(three_sum(nums), output);
+        nums = vec![0, 0];
+        output = vec![];
+        assert_eq!(three_sum(nums), output);
+        nums = vec![1,2,-2,-1];
+        output = vec![];
+        assert_eq!(three_sum(nums), output);
+        nums = vec![-1, 4, 0, 2, -1, -4];
+        output = vec![vec![-4, 0, 4], vec![-1, -1, 2]];
+        assert_eq!(three_sum(nums), output);
+        nums = vec![-1, 0, 1, 0];
+        output = vec![vec![-1, 0, 1]];
+        assert_eq!(three_sum(nums), output);
+        nums = vec![0, 0, 0];
+        output = vec![vec![0, 0, 0]];
+        assert_eq!(three_sum(nums), output);
     }
 }
