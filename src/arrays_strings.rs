@@ -225,9 +225,29 @@ fn three_sum(nums: Vec<i32>) -> Vec<Vec<i32>> {
     output
 }
 
+fn next_permutation(nums: &mut Vec<i32>) {
+    if nums.len() < 2 {
+        return;
+    }
+    let mut a: usize = nums.len() - 2;
+    let mut b: usize = nums.len() - 1;
+    while a > 0 && nums[a + 1] <= nums[a] {
+        a -= 1;
+    }
+    while b > 0 && nums[b] <= nums[a] {
+        b -= 1;
+    }
+    if a == 0 && b == 0 {
+        nums.reverse();
+    } else {
+        nums.swap(a, b);
+        nums[a + 1..].sort();
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{longest_substring, max_area, three_sum};
+    use super::{longest_substring, max_area, three_sum, next_permutation};
 
     #[test]
     fn test_longest_substring() {
@@ -293,5 +313,36 @@ mod tests {
         nums = vec![0, 0, 0];
         output = vec![vec![0, 0, 0]];
         assert_eq!(three_sum(nums), output);
+    }
+
+    #[test]
+    fn test_next_permutation() {
+        let mut number: Vec<i32> = vec![1, 3, 2];
+        next_permutation(&mut number);
+        assert_eq!(number, vec![2, 1, 3]);
+        number = vec![1, 2, 5, 4, 3];
+        next_permutation(&mut number);
+        assert_eq!(number, vec![1, 3, 2, 4, 5]);
+        number = vec![1];
+        next_permutation(&mut number);
+        assert_eq!(number, vec![1]);
+        number = vec![];
+        next_permutation(&mut number);
+        assert_eq!(number, vec![]);
+        number = vec![0,0,0];
+        next_permutation(&mut number);
+        assert_eq!(number, vec![0,0,0]);
+        number = vec![1, 4, 4];
+        next_permutation(&mut number);
+        assert_eq!(number, vec![4, 1, 4]);
+        number = vec![2, 3, 1];
+        next_permutation(&mut number);
+        assert_eq!(number, vec![3, 1, 2]);
+        number = vec![3, 2, 1];
+        next_permutation(&mut number);
+        assert_eq!(number, vec![1, 2, 3]);
+        number = vec![4,2,0,2,3,2,0];
+        next_permutation(&mut number);
+        assert_eq!(number, vec![4,2,0,3,0,2,2]);
     }
 }
