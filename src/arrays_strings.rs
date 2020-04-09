@@ -246,86 +246,123 @@ fn next_permutation(nums: &mut Vec<i32>) {
 }
 
 // whoa, holy mackerel!
-fn multiply_strings(num1: String, num2: String) -> String {
-    if num1 == String::from("0") || num2 == String::from("0") {
-        return String::from("0");
-    }
-    let mut num1_as_bytes: Vec<u8> = num1.into_bytes().iter_mut().map(|byte| *byte - 48).collect();
-    let mut num2_as_bytes: Vec<u8> = num2.into_bytes().iter_mut().map(|byte| *byte - 48).collect();
-    let mut byte_output: Vec<u8> = Vec::new();
+// fn multiply_strings(num1: String, num2: String) -> String {
+//     if num1 == String::from("0") || num2 == String::from("0") {
+//         return String::from("0");
+//     }
+//     let mut num1_as_bytes: Vec<u8> = num1.into_bytes().iter_mut().map(|byte| *byte - 48).collect();
+//     let mut num2_as_bytes: Vec<u8> = num2.into_bytes().iter_mut().map(|byte| *byte - 48).collect();
+//     let mut byte_output: Vec<u8> = Vec::new();
+// 
+//     let mut num2_index: usize = num2_as_bytes.len() - 1;
+//     let mut sum_queue: Vec<Vec<u8>> = Vec::new();
+//     let mut carry: u8 = 0;
+//     let mut longest_sum_array_len = 0;
+//     loop {
+//         let mut num1_index: usize = num1_as_bytes.len() - 1;
+//         let mut sum_sub_array = Vec::new();
+//         loop {
+//             let mut product = num1_as_bytes[num1_index] * num2_as_bytes[num2_index];
+//             product += carry;
+//             carry = 0;
+//             if product > 9 {
+//                 let ones_values = product % 10;
+//                 let tens_value = (product - (ones_values)) / 10;
+//                 carry = tens_value;
+//                 product = ones_values;
+//                 if num1_index == 0 {
+//                     sum_sub_array.push(product);
+//                     sum_sub_array.push(carry);
+//                     carry = 0;
+//                     break;
+//                 }
+//             }
+//             sum_sub_array.push(product);
+//             if num1_index == 0 {
+//                 break;
+//             }
+//             num1_index -= 1;
+//         }
+//         for _i in  0..num2_as_bytes.len() - 1 - num2_index {
+//             sum_sub_array.insert(0, 0);
+//         }
+//         longest_sum_array_len = max(sum_sub_array.len(), longest_sum_array_len);
+//         sum_queue.push(sum_sub_array);
+//         if num1_index == 0 && num2_index == 0 {
+//             break;
+//         }
+//         num2_index -= 1;
+//     }
+// 
+//     for i in 0..longest_sum_array_len {
+//         let mut sum = 0;
+//         sum += carry;
+//         carry = 0;
+//         for vec in &sum_queue {
+//             if let Some(value) = vec.get(i) {
+//                 sum += value;
+//                 if sum > 9 {
+//                     let ones_values = sum % 10;
+//                     let tens_value = (sum - (ones_values)) / 10;
+//                     carry += tens_value;
+//                     sum = ones_values;
+//                     if i == longest_sum_array_len - 1 {
+//                         byte_output.insert(0, sum);
+//                         byte_output.insert(0, carry);
+//                         sum = 0;
+//                         carry = 0;
+//                         break;
+//                     }
+//                 }
+//             } else {
+//                 continue;
+//             }
+//         }
+//         byte_output.insert(0, sum);
+//     }
+//     if byte_output[0] == 0 {
+//         byte_output.remove(0);
+//     }
+// 
+//     byte_output = byte_output.iter_mut().map(|int| *int + 48).collect();
+//     String::from_utf8(byte_output).unwrap()
+// }
 
-    let mut num2_index: usize = num2_as_bytes.len() - 1;
-    let mut sum_queue: Vec<Vec<u8>> = Vec::new();
-    let mut carry: u8 = 0;
-    let mut longest_sum_array_len = 0;
-    loop {
-        let mut num1_index: usize = num1_as_bytes.len() - 1;
-        let mut sum_sub_array = Vec::new();
-        loop {
-            let mut product = num1_as_bytes[num1_index] * num2_as_bytes[num2_index];
-            product += carry;
-            carry = 0;
-            if product > 9 {
-                let ones_values = product % 10;
-                let tens_value = (product - (ones_values)) / 10;
-                carry = tens_value;
-                product = ones_values;
-                if num1_index == 0 {
-                    sum_sub_array.push(product);
-                    sum_sub_array.push(carry);
-                    carry = 0;
-                    break;
-                }
+fn multiply_strings(num1: String, num2: String) -> String {
+    let num1_as_u8: Vec<u8> = num1.into_bytes().iter_mut().map(|byte| *byte - 48).collect();
+    let num2_as_u8: Vec<u8> = num2.into_bytes().iter_mut().map(|byte| *byte - 48).collect();
+    let num1_len = num1_as_u8.len();
+    let num2_len = num2_as_u8.len();
+    let mut sum: Vec<u8> = vec![0; num1_len + num2_len]; 
+    let mut pointer1: usize = 0;
+    let mut pointer2: usize = 0; 
+    for num1_index in (0..num1_len).rev() {
+        for num2_index in (0..num2_len).rev() {
+            pointer1 = num1_index + num2_index;
+            pointer2 = pointer1 + 1;
+            let mut product = num1_as_u8[num1_index] * num2_as_u8[num2_index];
+            product += sum[pointer2];
+            let ones_value = product % 10;
+            let mut tens_value = sum[pointer1] + ((product - ones_value) / 10);
+            if let Some(value) = sum.get_mut(pointer2) {
+                *value = ones_value;
             }
-            sum_sub_array.push(product);
-            if num1_index == 0 {
+            if let Some(value) = sum.get_mut(pointer1) {
+                *value = tens_value;
+            }
+        }
+    }
+    loop {
+        if let Some(int) = sum.get(0) {
+            if *int == 0 && sum.len() > 1 {
+                sum.remove(0);
+            } else {
                 break;
             }
-            num1_index -= 1;
         }
-        for _i in  0..num2_as_bytes.len() - 1 - num2_index {
-            sum_sub_array.insert(0, 0);
-        }
-        longest_sum_array_len = max(sum_sub_array.len(), longest_sum_array_len);
-        sum_queue.push(sum_sub_array);
-        if num1_index == 0 && num2_index == 0 {
-            break;
-        }
-        num2_index -= 1;
     }
-
-    for i in 0..longest_sum_array_len {
-        let mut sum = 0;
-        sum += carry;
-        carry = 0;
-        for vec in &sum_queue {
-            if let Some(value) = vec.get(i) {
-                sum += value;
-                if sum > 9 {
-                    let ones_values = sum % 10;
-                    let tens_value = (sum - (ones_values)) / 10;
-                    carry += tens_value;
-                    sum = ones_values;
-                    if i == longest_sum_array_len - 1 {
-                        byte_output.insert(0, sum);
-                        byte_output.insert(0, carry);
-                        sum = 0;
-                        carry = 0;
-                        break;
-                    }
-                }
-            } else {
-                continue;
-            }
-        }
-        byte_output.insert(0, sum);
-    }
-    if byte_output[0] == 0 {
-        byte_output.remove(0);
-    }
-
-    byte_output = byte_output.iter_mut().map(|int| *int + 48).collect();
-    String::from_utf8(byte_output).unwrap()
+    sum = sum.iter_mut().map(|int| *int + 48).collect();
+    String::from_utf8(sum).unwrap()
 }
 
 #[cfg(test)]
