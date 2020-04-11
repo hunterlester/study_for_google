@@ -385,9 +385,45 @@ fn rotate_matrix(matrix: &mut Vec<Vec<i32>>) {
     }
 }
 
+fn can_jump(nums: Vec<i32>) -> bool {
+    let mut bool_index: Vec<bool> = vec![false; nums.len()];
+    for (i, value) in nums.iter().enumerate().rev() {
+        if i + 1 == nums.len() {
+            if let Some(v) = bool_index.get_mut(i) {
+                *v = true;
+            }
+        } else {
+            for jump_index in 1..=*value {
+                let jump_index_bool = bool_index[i + jump_index as usize];
+                if let Some(bool) = bool_index.get_mut(i) {
+                    *bool = jump_index_bool;
+                    if jump_index_bool == true {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    bool_index[0]
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{longest_substring, max_area, three_sum, next_permutation, multiply_strings, rotate_matrix};
+    use super::{longest_substring, max_area, three_sum, next_permutation, multiply_strings, rotate_matrix, can_jump};
+
+    #[test]
+    fn test_can_jump() {
+        let mut nums = vec![2, 3, 1, 1, 4];
+        assert_eq!(can_jump(nums), true);
+        nums = vec![3, 2, 1, 0, 4];
+        assert_eq!(can_jump(nums), false);
+        nums = vec![0];
+        assert_eq!(can_jump(nums), true);
+        nums = vec![0, 0];
+        assert_eq!(can_jump(nums), false);
+        nums = vec![4, 0];
+        assert_eq!(can_jump(nums), true);
+    }
 
     fn matrices_eq(a: &mut Vec<Vec<i32>>, b: &mut Vec<Vec<i32>>) -> bool {
         let flat_matrix_a: Vec<&i32> = a.iter().flatten().collect();
