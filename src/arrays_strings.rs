@@ -1,5 +1,6 @@
 use std::collections::{HashSet, HashMap, BTreeMap, BTreeSet};
 use std::cmp::{max, min};
+use std::mem::swap;
 
 // pub fn longest_substring(s: String) -> i32 {
 //     let mut char_set: HashSet<String> = HashSet::new();
@@ -365,9 +366,65 @@ fn multiply_strings(num1: String, num2: String) -> String {
     String::from_utf8(sum).unwrap()
 }
 
+fn rotate_matrix(matrix: &mut Vec<Vec<i32>>) {
+    let mut pairs_to_swap: Vec<(usize, usize)> = Vec::new();
+    for (a, matrix_member_array) in matrix.iter().enumerate() {
+        for (b, _array_member) in matrix_member_array.iter().enumerate() {
+            if a < b {
+                pairs_to_swap.push((a, b));
+            }
+        }
+    }
+    for (a, b) in pairs_to_swap {
+        let (mut part_1, mut part_2) = matrix.split_at_mut(a + 1);
+        let part_1_len = part_1.len();
+        swap(&mut part_1[a][b], &mut part_2[b - part_1_len][a]);
+    }
+    for matrix_member_array in matrix.iter_mut() {
+        matrix_member_array.reverse();
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{longest_substring, max_area, three_sum, next_permutation, multiply_strings};
+    use super::{longest_substring, max_area, three_sum, next_permutation, multiply_strings, rotate_matrix};
+
+    fn matrices_eq(a: &mut Vec<Vec<i32>>, b: &mut Vec<Vec<i32>>) -> bool {
+        let flat_matrix_a: Vec<&i32> = a.iter().flatten().collect();
+        let flat_matrix_b: Vec<&i32> = b.iter().flatten().collect();
+        flat_matrix_a.iter().enumerate().all(|(i, int)| *int == flat_matrix_b[i])
+    }
+
+    #[test]
+    fn test_rotate_matrix() {
+        let mut matrix = vec![
+            vec![1,2,3],
+            vec![4,5,6],
+            vec![7,8,9],
+        ];
+        rotate_matrix(&mut matrix);
+        let mut expected_matrix = vec![
+            vec![7,4,1],
+            vec![8,5,2],
+            vec![9,6,3],
+        ];
+        assert!(matrices_eq(&mut matrix, &mut expected_matrix));
+
+        let mut matrix_2 = vec![
+            vec![ 5, 1, 9,11],
+            vec![ 2, 4, 8,10],
+            vec![13, 3, 6, 7],
+            vec![15,14,12,16],
+        ];
+        rotate_matrix(&mut matrix_2);
+        let mut expected_matrix_2 = vec![
+            vec![15,13, 2, 5],
+            vec![14, 3, 4, 1],
+            vec![12, 6, 8, 9],
+            vec![16, 7,10,11],
+        ];
+        assert!(matrices_eq(&mut matrix_2, &mut expected_matrix_2));
+    }
 
     #[test]
     fn test_longest_substring() {
