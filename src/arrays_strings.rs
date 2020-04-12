@@ -407,9 +407,34 @@ fn can_jump(nums: Vec<i32>) -> bool {
     bool_index[0]
 }
 
+fn plus_one(mut digits: Vec<i32>) -> Vec<i32> {
+    let mut carry = 1;
+    for i in (0..digits.len()).rev() {
+        if carry == 0 {
+            break;
+        }
+        if let Some(digit) = digits.get_mut(i) {
+            let sum = *digit + carry;
+            let ones_place = sum % 10;
+            carry = (sum - ones_place) / 10;
+            *digit = ones_place;
+        }
+        if i == 0 && carry > 0 {
+            digits.insert(0, carry);
+        }
+    }
+    digits
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{longest_substring, max_area, three_sum, next_permutation, multiply_strings, rotate_matrix, can_jump};
+    use super::{longest_substring, max_area, three_sum, next_permutation, multiply_strings, rotate_matrix, can_jump, plus_one};
+
+    #[test]
+    fn test_plus_one() {
+        let mut digits = vec![9, 9, 9];
+        assert_eq!(plus_one(digits), vec![1, 0, 0, 0]);
+    }
 
     #[test]
     fn test_can_jump() {
