@@ -426,9 +426,105 @@ fn plus_one(mut digits: Vec<i32>) -> Vec<i32> {
     digits
 }
 
+fn min_window(s: String, t: String) -> String {
+    let mut target_char_count: HashMap<String, i32> = HashMap::new();
+    let mut char_index: HashMap<String, Vec<usize>> = HashMap::new();
+    let mut char_index_set: BTreeSet<usize> = BTreeSet::new();
+    let mut smallest_target_window_indices: Option<(usize, usize)> = None;
+    let mut target_char_in_window_count = 0;
+    let mut window_boundary: usize = 0;
+    for char in t.chars() {
+        if let Some(count) = target_char_count.get_mut(&char.to_string()) {
+            *count += 1;
+        } else {
+            target_char_count.insert(char.to_string(), 1);
+        }
+    }
+    for (i, char) in s.char_indices() {
+        if let Some(count) = target_char_count.get(&char.to_string()) {
+            if let Some(vec) = char_index.get_mut(&char.to_string()) {
+                vec.push(i);
+                char_index_set.insert(i);
+                let char_index_len = vec.len();
+                if char_index_len > *count as usize {
+                    let item = vec.remove(0);
+                    char_index_set.remove(&item);
+                    if let Some(index) = char_index_set.iter().next() {
+                        window_boundary = *index;
+                    }
+                }
+            } else {
+                char_index.insert(char.to_string(), vec![i]);
+                char_index_set.insert(i);
+                if let Some(index) = char_index_set.iter().next() {
+                    window_boundary = *index;
+                }
+            }
+            if char_index_set.len() == t.len() {
+                if let Some((index_a, index_b)) = smallest_target_window_indices {
+                    if (index_b - index_a) > (i - window_boundary) {
+                        smallest_target_window_indices = Some((window_boundary, i))
+                    }
+                } else {
+                    smallest_target_window_indices = Some((window_boundary, i));
+                }
+                char_index_set.remove(&window_boundary);
+                if let Some(index) = char_index_set.iter().next() {
+                    window_boundary = *index;
+                }
+            }
+        }
+    }
+    if let Some((start, end)) = smallest_target_window_indices {
+        String::from(&s[start..=end])
+    } else {
+        String::from("")
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{longest_substring, max_area, three_sum, next_permutation, multiply_strings, rotate_matrix, can_jump, plus_one};
+    use super::{longest_substring, max_area, three_sum, next_permutation, multiply_strings, rotate_matrix, can_jump, plus_one, min_window};
+
+    #[test]
+    fn test_min_window() {
+        let mut string = String::from("ADOBECODEBANC");
+        let mut target = String::from("ABC");
+        assert_eq!(min_window(string, target), String::from("BANC"));
+        string = String::from("ADOBECODEBANC");
+        target = String::from("");
+        assert_eq!(min_window(string, target), String::from(""));
+        string = String::from("ADOBECODEBANC");
+        target = String::from("JKL");
+        assert_eq!(min_window(string, target), String::from(""));
+        string = String::from("a");
+        target = String::from("a");
+        assert_eq!(min_window(string, target), String::from("a"));
+        string = String::from("aa");
+        target = String::from("aa");
+        assert_eq!(min_window(string, target), String::from("aa"));
+        string = String::from("bbaa");
+        target = String::from("aba");
+        assert_eq!(min_window(string, target), String::from("baa"));
+        string = String::from("a");
+        target = String::from("aa");
+        assert_eq!(min_window(string, target), String::from(""));
+        string = String::from("a");
+        target = String::from("b");
+        assert_eq!(min_window(string, target), String::from(""));
+        string = String::from("abab");
+        target = String::from("aa");
+        assert_eq!(min_window(string, target), String::from("aba"));
+        string = String::from("aabbcce");
+        target = String::from("abc");
+        assert_eq!(min_window(string, target), String::from("abbc"));
+        string = String::from("ABRADOBECODEBANC");
+        target = String::from("ABBC");
+        assert_eq!(min_window(string, target), String::from("BRADOBEC"));
+        string = String::from("ab");
+        target = String::from("b");
+        assert_eq!(min_window(string, target), String::from("b"));
+    }
 
     #[test]
     fn test_plus_one() {
