@@ -431,7 +431,6 @@ fn min_window(s: String, t: String) -> String {
     let mut char_index: HashMap<String, Vec<usize>> = HashMap::new();
     let mut char_index_set: BTreeSet<usize> = BTreeSet::new();
     let mut smallest_target_window_indices: Option<(usize, usize)> = None;
-    let mut target_char_in_window_count = 0;
     let mut window_boundary: usize = 0;
     for char in t.chars() {
         if let Some(count) = target_char_count.get_mut(&char.to_string()) {
