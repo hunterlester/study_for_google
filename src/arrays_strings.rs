@@ -481,9 +481,48 @@ fn min_window(s: String, t: String) -> String {
     }
 }
 
+fn length_of_longest_substring_two_distinct(s: String) -> i32 {
+    const DISTINCT_CHARS: i8 = 2;
+    let mut longest_substring: i32 = 0;
+    let mut char_index: HashMap<String, usize> = HashMap::with_capacity(DISTINCT_CHARS as usize + 1);
+    let mut left: usize = 0; 
+    let mut right: usize = 0; 
+    while right < s.len() {
+        char_index.insert(String::from(&s[right..right+1]), right);
+        let (least_i_char, least_index) = if let Some((least_i_char, least_index)) = char_index.iter().min_by(|x, y| x.1.cmp(y.1)) { (least_i_char.clone(), *least_index) } else { break; };
+        if char_index.len() > DISTINCT_CHARS as usize {
+            longest_substring = max(longest_substring, right as i32 - left as i32);
+            char_index.remove(&least_i_char);
+            left = least_index + 1;
+        } else {
+            longest_substring = max(longest_substring, right as i32 - left as i32 + 1);
+        }
+        right += 1;
+    }
+    longest_substring
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{longest_substring, max_area, three_sum, next_permutation, multiply_strings, rotate_matrix, can_jump, plus_one, min_window};
+    use super::{longest_substring, max_area, three_sum, next_permutation, multiply_strings, rotate_matrix, can_jump, plus_one, min_window, length_of_longest_substring_two_distinct};
+
+    #[test]
+    fn test_length_of_longest_substring_two_distinct() {
+        let mut string = String::from("eceba");
+        assert_eq!(length_of_longest_substring_two_distinct(string), 3);
+        string = String::from("ccaabbb");
+        assert_eq!(length_of_longest_substring_two_distinct(string), 5);
+        string = String::from("aaaaaa");
+        assert_eq!(length_of_longest_substring_two_distinct(string), 6);
+        string = String::from("");
+        assert_eq!(length_of_longest_substring_two_distinct(string), 0);
+        string = String::from("ab");
+        assert_eq!(length_of_longest_substring_two_distinct(string), 2);
+        string = String::from("a");
+        assert_eq!(length_of_longest_substring_two_distinct(string), 1);
+        string = String::from("abaccc");
+        assert_eq!(length_of_longest_substring_two_distinct(string), 4);
+    }
 
     #[test]
     fn test_min_window() {
