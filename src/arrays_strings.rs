@@ -502,9 +502,127 @@ fn length_of_longest_substring_two_distinct(s: String) -> i32 {
     longest_substring
 }
 
+// fn find_missing_ranges(nums: Vec<i32>, lower: i32, upper: i32) -> Vec<String> {
+//     let mut output: Vec<String> = Vec::new();
+//     if nums.len() == 0 {
+//         if (upper - lower) > 1 {
+//             output.push(format!("{:?}->{:?}", lower, upper));
+//         } else {
+//             output.push(format!("{:?}", lower));
+//         }
+//         return output;
+//     }
+//     for (i, num) in nums.iter().enumerate() {
+//         if i == 0 {
+//             let range_count = num - lower;
+//             if range_count > 1 {
+//                 output.push(format!("{:?}->{:?}", lower, num - 1));
+//             } else if range_count == 1 {
+//                 output.push(format!("{:?}", lower));
+//             }
+//             if nums.len() == 1 {
+//                 break;
+//             }
+//         }
+// 
+//         if *num == upper {
+//             return output;
+//         }
+// 
+//         let next_num = nums[i + 1];
+//         let range_count = next_num - num;
+//         if range_count > 2 {
+//             output.push(format!("{:?}->{:?}", num + 1, next_num - 1));
+//         } else if range_count == 2 {
+//             output.push(format!("{:?}", num + 1));
+//         }
+//         if i == nums.len() - 2 {
+//             break;
+//         }
+//     }
+// 
+//     let next_num = nums[nums.len() - 1];
+//     let range_count = upper - next_num;
+//     if range_count > 1 {
+//         output.push(format!("{:?}->{:?}", next_num + 1, upper));
+//     } else if range_count == 1 {
+//         output.push(format!("{:?}", upper));
+//     }
+//     output
+// }
+
+fn find_missing_ranges(nums: Vec<i32>, mut lower: i32, upper: i32) -> Vec<String> {
+    let mut output: Vec<String> = Vec::new();
+    for num in nums {
+        if num > lower {
+            if num - 1 > lower {
+                output.push(format!("{:?}->{:?}", lower, num - 1));
+            } else {
+                output.push(format!("{:?}", lower));
+            } 
+        }
+        if num == upper {
+            return output;
+        }
+        lower = num + 1;
+    }
+    if upper > lower {
+        output.push(format!("{:?}->{:?}", lower, upper));
+    } else if upper == lower {
+        output.push(format!("{:?}", lower));
+    }
+    output
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{longest_substring, max_area, three_sum, next_permutation, multiply_strings, rotate_matrix, can_jump, plus_one, min_window, length_of_longest_substring_two_distinct};
+    use super::{longest_substring, max_area, three_sum, next_permutation, multiply_strings, rotate_matrix, can_jump, plus_one, min_window, length_of_longest_substring_two_distinct, find_missing_ranges};
+
+    #[test]
+    fn test_find_missing_ranges() {
+        let mut nums = vec![0, 1, 3, 50, 75];
+        let mut upper = 99;
+        let mut lower = 0;
+        assert_eq!(find_missing_ranges(nums, lower, upper), vec!["2", "4->49", "51->74", "76->99"]);
+        nums = vec![3, 50, 75];
+        assert_eq!(find_missing_ranges(nums, lower, upper), vec!["0->2", "4->49", "51->74", "76->99"]);
+        nums = vec![];
+        upper = 1;
+        lower = 1;
+        assert_eq!(find_missing_ranges(nums, lower, upper), vec!["1"]);
+        nums = vec![];
+        upper = 99;
+        lower = 1;
+        assert_eq!(find_missing_ranges(nums, lower, upper), vec!["1->99"]);
+        nums = vec![];
+        upper = 0;
+        lower = 0;
+        assert_eq!(find_missing_ranges(nums, lower, upper), vec!["0"]);
+        nums = vec![-9, -5, -1, 3, 6, 15];
+        upper = 20;
+        lower = -12;
+        assert_eq!(find_missing_ranges(nums, lower, upper), vec!["-12->-10", "-8->-6", "-4->-2", "0->2", "4->5", "7->14", "16->20"]);
+        nums = vec![-1];
+        upper = -1;
+        lower = -1;
+        assert_eq!(find_missing_ranges(nums, lower, upper), Vec::<String>::new());
+        nums = vec![-1];
+        lower = -2;
+        upper = -1;
+        assert_eq!(find_missing_ranges(nums, lower, upper), vec!["-2"]);
+        nums = vec![-2648, 2647];
+        lower = -2648;
+        upper = 2647;
+        assert_eq!(find_missing_ranges(nums, lower, upper), vec!["-2647->2646"]);
+        nums = vec![0, 1, 3, 50, 75, 80, 90];
+        upper = 75;
+        lower = 0;
+        assert_eq!(find_missing_ranges(nums, lower, upper), vec!["2", "4->49", "51->74"]);
+        nums = vec![-2147483648,2147483647];
+        lower = -2147483648;
+        upper = 2147483647;
+        assert_eq!(find_missing_ranges(nums, lower, upper), vec!["-2147483647->2147483646"]);
+    }
 
     #[test]
     fn test_length_of_longest_substring_two_distinct() {
