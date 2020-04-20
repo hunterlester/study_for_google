@@ -1,6 +1,7 @@
 use std::collections::{HashSet, HashMap, BTreeMap, BTreeSet};
 use std::cmp::{max, min};
 use std::mem::swap;
+use std::ops::Bound::{Included, Excluded};
 
 // pub fn longest_substring(s: String) -> i32 {
 //     let mut char_set: HashSet<String> = HashSet::new();
@@ -574,9 +575,70 @@ fn find_missing_ranges(nums: Vec<i32>, mut lower: i32, upper: i32) -> Vec<String
     output
 }
 
+fn next_closest_time(time: String) -> String {
+    let mut digit_values: BTreeSet<u32> = BTreeSet::new();
+    let mut digit_order: Vec<u32> = Vec::new();
+    let mut min_value: u32 = 9;
+    for char in time.chars() {
+        if let Some(int) = char.to_digit(10) {
+            digit_order.push(int);
+            digit_values.insert(int);
+            min_value = min(min_value, int);
+        }
+    }
+    for (i, digit) in digit_order.iter_mut().enumerate().rev() {
+        let mut upper_bound = Included(&9);
+        if i == 2 {
+            upper_bound = Included(&5);
+        }
+        if i == 1 {
+            if let Ok(int) = time[0..1].parse::<u32>() {
+                if int == 2 {
+                    upper_bound = Included(&3);
+                }
+            }
+        }
+        if i == 0 {
+            upper_bound = Included(&2);
+            if let Ok(int) = time[1..2].parse::<u32>() {
+                if int > 3 {
+                    upper_bound = Included(&1);
+                }
+            }
+        }
+        if let Some(next_value) = digit_values.range((Excluded(&*digit), upper_bound)).next() {
+            *digit = *next_value;
+            break;
+        } else {
+            *digit = min_value;
+        }
+    }
+    format!("{:?}{:?}:{:?}{:?}", digit_order[0], digit_order[1], digit_order[2], digit_order[3])
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{longest_substring, max_area, three_sum, next_permutation, multiply_strings, rotate_matrix, can_jump, plus_one, min_window, length_of_longest_substring_two_distinct, find_missing_ranges};
+    use super::{
+        longest_substring, max_area, three_sum, next_permutation, multiply_strings,
+        rotate_matrix, can_jump, plus_one, min_window, length_of_longest_substring_two_distinct,
+        find_missing_ranges, next_closest_time
+    };
+
+    #[test]
+    fn test_next_closest_time() {
+        let mut time = String::from("19:34");
+        assert_eq!(next_closest_time(time), String::from("19:39"));
+        time = String::from("15:35");
+        assert_eq!(next_closest_time(time), String::from("15:51"));
+        time = String::from("12:55");
+        assert_eq!(next_closest_time(time), String::from("15:11"));
+        time = String::from("12:55");
+        assert_eq!(next_closest_time(time), String::from("15:11"));
+        time = String::from("02:55");
+        assert_eq!(next_closest_time(time), String::from("05:00"));
+        time = String::from("23:55");
+        assert_eq!(next_closest_time(time), String::from("22:22"));
+    }
 
     #[test]
     fn test_find_missing_ranges() {
