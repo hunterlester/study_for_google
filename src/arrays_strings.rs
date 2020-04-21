@@ -616,13 +616,84 @@ fn next_closest_time(time: String) -> String {
     format!("{:?}{:?}:{:?}{:?}", digit_order[0], digit_order[1], digit_order[2], digit_order[3])
 }
 
+fn make_char_count_map(s: &String) -> Vec<u32> {
+    let mut char_count_map: Vec<u32> = Vec::new();
+    let mut char_index: usize = 0;
+    let mut current_char: String = String::from("");
+
+    for char in s.chars() {
+        if let Some(count) = char_count_map.get_mut(char_index) {
+            if char.to_string() == current_char {
+                *count += 1;
+            } else {
+                current_char = char.to_string();
+                char_count_map.push(1);
+                char_index += 1;
+            }
+        } else {
+            current_char = char.to_string();
+            char_count_map.push(1);
+        }
+    }
+    char_count_map
+}
+
+fn expressive_words(s: String, words: Vec<String>) -> i32 {
+    let target_char_count_map: Vec<u32> = make_char_count_map(&s);
+    let mut true_count = words.len() as i32;
+
+    for word in words {
+        let word_char_count_map: Vec<u32> = make_char_count_map(&word);
+        if word_char_count_map.len() != target_char_count_map.len() {
+            true_count -= 1;
+            continue;
+        } 
+        if (s.len() == word.len()) && (word != s) {
+            true_count -= 1;
+            continue;
+        }
+
+        for (i, word_char_count) in word_char_count_map.iter().enumerate() {
+            if let Some(target_char_count) = target_char_count_map.get(i) {
+                if word_char_count < target_char_count && *target_char_count < 3 {
+                    true_count -= 1;
+                    break;
+                } else if word_char_count > target_char_count {
+                    true_count -= 1;
+                    break;
+                }
+            } else {
+                true_count -= 1;
+                break;
+            }
+        }
+    }
+    true_count
+}
+
 #[cfg(test)]
 mod tests {
     use super::{
         longest_substring, max_area, three_sum, next_permutation, multiply_strings,
         rotate_matrix, can_jump, plus_one, min_window, length_of_longest_substring_two_distinct,
-        find_missing_ranges, next_closest_time
+        find_missing_ranges, next_closest_time, expressive_words
     };
+
+    #[test]
+    fn test_expressive_words() {
+        let mut string = String::from("heeellooo");
+        let mut words = vec![String::from("hello"), String::from("hi"), String::from("helo")];
+        assert_eq!(expressive_words(string, words), 1);
+        string = String::from("abcd");
+        words = vec![String::from("abc")];
+        assert_eq!(expressive_words(string, words), 0);
+        string = String::from("aaa");
+        words = vec![String::from("aaaa")];
+        assert_eq!(expressive_words(string, words), 0);
+        string = String::from("heeellooo");
+        words = vec![String::from("axxxrrzzz")];
+        assert_eq!(expressive_words(string, words), 0);
+    }
 
     #[test]
     fn test_next_closest_time() {
