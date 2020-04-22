@@ -1,4 +1,5 @@
 mod arrays_strings;
+mod linked_lists;
 
 use std::collections::{HashSet, BTreeMap};
 use std::ops::Bound::{Unbounded, Excluded};
